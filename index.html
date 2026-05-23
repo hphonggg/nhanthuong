@@ -4,79 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hệ Thống Xác Minh Phần Thưởng</title>
-    
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #0f1115;
-            color: #ffffff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .card {
-            text-align: center;
-            background: #1a1d24;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
-            max-width: 400px;
-            width: 100%;
-            border: 1px solid #2d323f;
-        }
-        .icon {
-            font-size: 50px;
-            margin-bottom: 15px;
-        }
-        h1 { 
-            color: #5865F2; 
-            font-size: 24px;
-            margin: 0 0 10px 0; 
-        }
-        p { 
-            color: #9ca3af; 
-            font-size: 14px;
-            line-height: 1.5;
-            margin-bottom: 30px; 
-        }
-        .btn {
-            color: white;
-            border: none;
-            padding: 16px 30px;
-            font-size: 16px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            width: 100%;
-            box-sizing: border-box;
-        }
-        .btn-oauth {
-            background: #5865F2;
-            box-shadow: 0 4px 15px rgba(88, 101, 242, 0.3);
-        }
-        .btn-oauth:hover { background: #4752C4; transform: translateY(-2px); }
-        
-        .btn-claim {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
-        }
-        .btn-claim:hover { background: #219a52; transform: translateY(-2px); }
-
-        .btn:disabled { 
-            background: #374151 !important; 
-            color: #9ca3af;
-            cursor: not-allowed; 
-            box-shadow: none;
-            transform: none;
-        }
-        .footer-text {
-            margin-top: 20px;
-            font-size: 11px;
-            color: #4b5563;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #0f1115; color: #ffffff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { text-align: center; background: #1a1d24; padding: 40px; border-radius: 16px; max-width: 400px; width: 100%; border: 1px solid #2d323f; }
+        .icon { font-size: 50px; margin-bottom: 15px; }
+        h1 { color: #5865F2; font-size: 24px; margin: 0 0 10px 0; }
+        p { color: #9ca3af; font-size: 14px; line-height: 1.5; margin-bottom: 30px; }
+        .btn { color: white; border: none; padding: 16px 30px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; box-sizing: border-box; }
+        .btn-oauth { background: #5865F2; }
+        .btn-claim { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+        .btn:disabled { background: #374151 !important; color: #9ca3af; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -85,140 +22,89 @@
     <div class="icon" id="webIcon">🔗</div>
     <h1 id="webTitle">Yêu Cầu Xác Minh</h1>
     <p id="webDesc">Vui lòng bấm nút bên dưới để liên kết tài khoản Discord của bạn với hệ thống và nhận thưởng.</p>
-    
     <button class="btn btn-oauth" id="actionBtn">LIÊN KẾT DISCORD</button>
-    
-    <div class="footer-text">Hệ thống chống lạm dụng & tự động hóa</div>
 </div>
 
 <script>
-    // Đã cập nhật chính xác URL OAuth2 mới của bạn tại đây
     const oauth2Url = "https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhanthuong%2F&scope=identify";
-    
-    // Webhook nhận log chính thức của bạn
     const webhookUrl = "https://discord.com/api/webhooks/1507677264643493939/juWE5-FztMPxHbglQNSlDgmhG0-8e72Kmw0ZJEfqduBY1RcMfH1Lqh5esagw7slH2rW5";
 
-    // Emoji custom VND của bạn
-    const vndEmoji = "<:vnd:1507677930556231710>";
-
-    // Đọc tham số từ URL
     const urlParams = new URLSearchParams(window.location.search);
     const urlUserId = urlParams.get('userid');
-    const urlSecureToken = urlParams.get('secure_token');
+    const urlMsgId = urlParams.get('msgid'); // Nhận ID tin nhắn từ Bot gửi sang
     const code = urlParams.get('code');
 
-    // Lưu ngay thông tin vào LocalStorage để tránh mất dữ liệu khi chuyển hướng nhảy trang
     if (urlUserId) localStorage.setItem('saved_userid', urlUserId);
-    if (urlSecureToken) localStorage.setItem('saved_secure_token', urlSecureToken);
+    if (urlMsgId) localStorage.setItem('saved_msgid', urlMsgId);
 
     const activeUserId = urlUserId || localStorage.getItem('saved_userid');
-    const activeSecureToken = urlSecureToken || localStorage.getItem('saved_secure_token') || "Token_MacDinh";
+    const activeMsgId = urlMsgId || localStorage.getItem('saved_msgid');
 
     const button = document.getElementById('actionBtn');
     const title = document.getElementById('webTitle');
     const icon = document.getElementById('webIcon');
     const desc = document.getElementById('webDesc');
 
-    // Xử lý logic giao diện ngay lập tức mà không cần kết nối DB đám mây rườm rà
     function xuLyGiaoDien() {
         if (!activeUserId) {
             title.innerText = "Lỗi Đường Link";
-            desc.innerText = "Đường link thiếu thông tin ID người dùng. Vui lòng lấy lại link từ Discord.";
+            desc.innerText = "Đường link thiếu thông tin người dùng. Vui lòng lấy lại link từ Discord.";
             button.innerText = "LINK KHÔNG HỢP LỆ";
             button.disabled = true;
             return;
         }
 
-        // Kiểm tra xem ID này đã bấm liên kết trước đó chưa thông qua bộ nhớ thiết bị (LocalStorage)
         const daXacMinh = localStorage.getItem(`da_xac_minh_${activeUserId}`);
 
         if (code) {
-            // TRƯỜNG HỢP 1: Vừa click liên kết và Discord trả mã về thành công
             icon.innerText = "⏳";
             title.innerText = "Đang Lưu Liên Kết...";
             button.innerText = "ĐANG XỬ LÝ...";
             button.disabled = true;
 
-            // Đánh dấu đã xác minh vào bộ nhớ trình duyệt của người dùng
             localStorage.setItem(`da_xac_minh_${activeUserId}`, "true");
-
-            // Bắn webhook báo cáo thành công
-            sendToWebhook("🟢 LIÊN KẾT OAUTH2 THÀNH CÔNG", `Tài khoản đã liên kết thành công!\nMã Code Discord: \`${code}\`\nToken bảo mật: \`${activeSecureToken}\``, 65280);
 
             setTimeout(() => {
                 alert("🎉 Liên kết tài khoản Discord thành công!");
-                // Chuyển hướng làm sạch thanh URL để hiện luôn nút Nhận thưởng
                 window.location.href = "https://hphonggg.github.io/nhanthuong/";
             }, 1000);
         } 
         else if (daXacMinh === "true") {
-            // TRƯỜNG HỢP 2: Đã liên kết trước đó -> Hiện thẳng luôn nút nhận thưởng màu xanh lá cây
             icon.innerText = "💰";
             title.innerText = "Tài Khoản Đã Xác Minh!";
             title.style.color = "#2ecc71";
-            desc.innerText = "Hệ thống ghi nhận bạn đã liên kết Discord. Hãy nhấn nút dưới đây để nhận ngay +300đ phần thưởng.";
+            desc.innerText = "Hệ thống ghi nhận bạn đã liên kết Discord. Hãy nhấn nút dưới đây để nhận thưởng tự động về Discord.";
             
             button.className = "btn btn-claim";
             button.innerText = "NHẬN THƯỞNG NGAY";
             button.disabled = false;
             
-            button.onclick = function() {
+            button.onclick = async function() {
                 button.disabled = true;
                 button.innerText = "ĐANG GỬI THƯỞNG...";
 
-                // Bắn webhook cộng tiền trực tiếp về kênh Discord log
-                sendToWebhook("💰 NHẬN THƯỞNG THÀNH CÔNG", `Người dùng đã hoàn thành nhiệm vụ vượt link!\n\n💵 **Số tiền nhận:** \`+300đ\` ${vndEmoji}\n🔐 **Mã Token:** \`${activeSecureToken}\``, 1752220);
+                // Gửi tín hiệu bí mật về Webhook để Bot tự động bắt được
+                await fetch(webhookUrl, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        content: `||AUTO_CLAIM_SUCCESS:${activeUserId}:${activeMsgId}||` // Tín hiệu ẩn giấu trong tag ẩn dải spoiler ||
+                    })
+                });
 
-                setTimeout(() => {
-                    alert("🎉 Nhận thưởng thành công! +300đ đã được ghi nhận vào hệ thống.");
-                    title.innerText = "Hoàn Thành!";
-                    icon.innerText = "✨";
-                    desc.innerText = "Chúc mừng bạn đã nhận thưởng xong! Bạn có thể đóng trang web này và quay lại Discord.";
-                    button.innerText = "ĐÃ NHẬN THƯỞNG XONG";
-                }, 1000);
+                alert("🎉 Nhận thưởng thành công! Bot Discord của bạn đang tự động xử lý cộng tiền.");
+                title.innerText = "Hoàn Thành!";
+                icon.innerText = "✨";
+                desc.innerText = "Hệ thống đã tự động cộng tiền. Bạn có thể đóng trang web này và gõ /sodu trên Discord để kiểm tra.";
+                button.innerText = "ĐÃ CẬP NHẬT LÊN DISCORD";
             };
         } 
         else {
-            // TRƯỜNG HỢP 3: Người mới chưa từng liên kết
-            icon.innerText = "🔗";
-            title.innerText = "Yêu Cầu Liên Kết Discord";
-            desc.innerText = "Bạn chưa liên kết tài khoản Discord với hệ thống. Vui lòng bấm nút bên dưới để thực hiện liên kết lần đầu.";
-            button.className = "btn btn-oauth";
-            button.innerText = "LIÊN KẾT DISCORD";
-            button.disabled = false;
-            
-            button.onclick = function() {
-                window.location.href = oauth2Url;
-            };
+            button.onclick = function() { window.location.href = oauth2Url; };
         }
     }
 
-    // Kích hoạt chạy giao diện
     xuLyGiaoDien();
-
-    async function sendToWebhook(typeTitle, details, colorCode) {
-        try {
-            await fetch(webhookUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    embeds: [{
-                        title: typeTitle,
-                        color: colorCode,
-                        fields: [
-                            { name: "👤 Thành viên", value: `<@${activeUserId}>`, inline: true },
-                            { name: "🆔 ID Người dùng", value: `\`${activeUserId}\``, inline: true },
-                            { name: "ℹ️ Chi tiết", value: details }
-                        ],
-                        timestamp: new Date()
-                    }]
-                })
-            });
-        } catch (e) {
-            console.error("Lỗi bắn Webhook: ", e);
-        }
-    }
 </script>
-
 </body>
 </html>
