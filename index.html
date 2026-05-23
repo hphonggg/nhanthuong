@@ -92,7 +92,7 @@
 </div>
 
 <script>
-    // Link OAuth2 Discord của bạn
+    // Đã cập nhật chính xác URL OAuth2 mới của bạn tại đây
     const oauth2Url = "https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhanthuong%2F&scope=identify";
     
     // Webhook nhận log chính thức của bạn
@@ -107,7 +107,7 @@
     const urlSecureToken = urlParams.get('secure_token');
     const code = urlParams.get('code');
 
-    // Lưu ngay thông tin để chống mất dữ liệu khi nhảy trang
+    // Lưu ngay thông tin vào LocalStorage để tránh mất dữ liệu khi chuyển hướng nhảy trang
     if (urlUserId) localStorage.setItem('saved_userid', urlUserId);
     if (urlSecureToken) localStorage.setItem('saved_secure_token', urlSecureToken);
 
@@ -119,7 +119,7 @@
     const icon = document.getElementById('webIcon');
     const desc = document.getElementById('webDesc');
 
-    // XỬ LÝ TRỰC TIẾP KHÔNG CẦN CHỜ ĐỢI CƠ SỞ DỮ LIỆU FILEBASE RƯỜM RÀ
+    // Xử lý logic giao diện ngay lập tức mà không cần kết nối DB đám mây rườm rà
     function xuLyGiaoDien() {
         if (!activeUserId) {
             title.innerText = "Lỗi Đường Link";
@@ -129,11 +129,11 @@
             return;
         }
 
-        // Kiểm tra xem người dùng này đã bấm liên kết trước đó chưa thông qua bộ nhớ máy khách (LocalStorage)
+        // Kiểm tra xem ID này đã bấm liên kết trước đó chưa thông qua bộ nhớ thiết bị (LocalStorage)
         const daXacMinh = localStorage.getItem(`da_xac_minh_${activeUserId}`);
 
         if (code) {
-            // TRƯỜNG HỢP 1: Người dùng vừa ấn duyệt trên Discord và quay lại web
+            // TRƯỜNG HỢP 1: Vừa click liên kết và Discord trả mã về thành công
             icon.innerText = "⏳";
             title.innerText = "Đang Lưu Liên Kết...";
             button.innerText = "ĐANG XỬ LÝ...";
@@ -142,7 +142,7 @@
             // Đánh dấu đã xác minh vào bộ nhớ trình duyệt của người dùng
             localStorage.setItem(`da_xac_minh_${activeUserId}`, "true");
 
-            // Bắn webhook báo cáo
+            // Bắn webhook báo cáo thành công
             sendToWebhook("🟢 LIÊN KẾT OAUTH2 THÀNH CÔNG", `Tài khoản đã liên kết thành công!\nMã Code Discord: \`${code}\`\nToken bảo mật: \`${activeSecureToken}\``, 65280);
 
             setTimeout(() => {
@@ -152,7 +152,7 @@
             }, 1000);
         } 
         else if (daXacMinh === "true") {
-            // TRƯỜNG HỢP 2: Đã liên kết xong rồi -> Hiện thẳng luôn nút nhận thưởng màu xanh lá cây cực đẹp
+            // TRƯỜNG HỢP 2: Đã liên kết trước đó -> Hiện thẳng luôn nút nhận thưởng màu xanh lá cây
             icon.innerText = "💰";
             title.innerText = "Tài Khoản Đã Xác Minh!";
             title.style.color = "#2ecc71";
@@ -166,7 +166,7 @@
                 button.disabled = true;
                 button.innerText = "ĐANG GỬI THƯỞNG...";
 
-                // Bắn webhook cộng tiền trực tiếp
+                // Bắn webhook cộng tiền trực tiếp về kênh Discord log
                 sendToWebhook("💰 NHẬN THƯỞNG THÀNH CÔNG", `Người dùng đã hoàn thành nhiệm vụ vượt link!\n\n💵 **Số tiền nhận:** \`+300đ\` ${vndEmoji}\n🔐 **Mã Token:** \`${activeSecureToken}\``, 1752220);
 
                 setTimeout(() => {
@@ -179,7 +179,7 @@
             };
         } 
         else {
-            // TRƯỜNG HỢP 3: Người mới chưa liên kết
+            // TRƯỜNG HỢP 3: Người mới chưa từng liên kết
             icon.innerText = "🔗";
             title.innerText = "Yêu Cầu Liên Kết Discord";
             desc.innerText = "Bạn chưa liên kết tài khoản Discord với hệ thống. Vui lòng bấm nút bên dưới để thực hiện liên kết lần đầu.";
@@ -193,7 +193,7 @@
         }
     }
 
-    // Chạy luôn giao diện không cần chờ đợi gì hết
+    // Kích hoạt chạy giao diện
     xuLyGiaoDien();
 
     async function sendToWebhook(typeTitle, details, colorCode) {
