@@ -27,11 +27,14 @@
 
 <script>
     const oauth2Url = "https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhanthuong%2F&scope=identify";
-    const webhookUrl = "https://discord.com/api/webhooks/1507677264643493939/juWE5-FztMPxHbglQNSlDgmhG0-8e72Kmw0ZJEfqduBY1RcMfH1Lqh5esagw7slH2rW5";
+    
+    // Phân loại Webhook chuẩn theo yêu cầu của bạn
+    const webhookLienKet = "https://discord.com/api/webhooks/1507661372471902278/j4cT8FtQUALGpKHRNBAG2aVLr4Up4EcVQOOt91DMHclsF2ZLcxr_GVgmTKM4LnvAkLNj";
+    const webhookVuotThanhCong = "https://discord.com/api/webhooks/1507661375244075061/XS1DiHi-LCRkAjQRrG3UrvztqS3gMPgv8ArN3rwseZw7FktEDoD5lMMMvfyOCcw8PFfG";
 
     const urlParams = new URLSearchParams(window.location.search);
     const urlUserId = urlParams.get('userid');
-    const urlMsgId = urlParams.get('msgid'); // Nhận ID tin nhắn từ Bot gửi sang
+    const urlMsgId = urlParams.get('msgid');
     const code = urlParams.get('code');
 
     if (urlUserId) localStorage.setItem('saved_userid', urlUserId);
@@ -45,10 +48,20 @@
     const icon = document.getElementById('webIcon');
     const desc = document.getElementById('webDesc');
 
+    async function sendLog(url, embedData) {
+        try {
+            await fetch(url, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ embeds: [embedData] })
+            });
+        } catch(e) { console.error(e); }
+    }
+
     function xuLyGiaoDien() {
         if (!activeUserId) {
             title.innerText = "Lỗi Đường Link";
-            desc.innerText = "Đường link thiếu thông tin người dùng. Vui lòng lấy lại link từ Discord.";
+            desc.innerText = "Đường link thiếu thông tin ID người dùng. Vui lòng lấy lại link từ Discord.";
             button.innerText = "LINK KHÔNG HỢP LỆ";
             button.disabled = true;
             return;
@@ -64,6 +77,18 @@
 
             localStorage.setItem(`da_xac_minh_${activeUserId}`, "true");
 
+            // Bắn log về kênh "log người bấm liên kết"
+            sendLog(webhookLienKet, {
+                title: "🟢 TÀI KHOẢN LIÊN KẾT OAUTH2",
+                color: 65280,
+                fields: [
+                    { name: "👤 Thành viên", value: `<@${activeUserId}>`, inline: true },
+                    { name: "🆔 ID Người dùng", value: `\`${activeUserId}\``, inline: true },
+                    { name: "🔑 Mã Code", value: `\`${code}\`` }
+                ],
+                timestamp: new Date()
+            });
+
             setTimeout(() => {
                 alert("🎉 Liên kết tài khoản Discord thành công!");
                 window.location.href = "https://hphonggg.github.io/nhanthuong/";
@@ -73,7 +98,7 @@
             icon.innerText = "💰";
             title.innerText = "Tài Khoản Đã Xác Minh!";
             title.style.color = "#2ecc71";
-            desc.innerText = "Hệ thống ghi nhận bạn đã liên kết Discord. Hãy nhấn nút dưới đây để nhận thưởng tự động về Discord.";
+            desc.innerText = "Hệ thống ghi nhận bạn đã liên kết Discord. Hãy nhấn nút dưới đây để hệ thống tự động cộng thưởng.";
             
             button.className = "btn btn-claim";
             button.innerText = "NHẬN THƯỞNG NGAY";
@@ -83,20 +108,30 @@
                 button.disabled = true;
                 button.innerText = "ĐANG GỬI THƯỞNG...";
 
-                // Gửi tín hiệu bí mật về Webhook để Bot tự động bắt được
-                await fetch(webhookUrl, {
+                // Bắn tín hiệu kèm log về kênh "log vượt link thành công"
+                await fetch(webhookVuotThanhCong, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        content: `||AUTO_CLAIM_SUCCESS:${activeUserId}:${activeMsgId}||` // Tín hiệu ẩn giấu trong tag ẩn dải spoiler ||
+                        content: `||AUTO_CLAIM_SUCCESS:${activeUserId}:${activeMsgId}||`,
+                        embeds: [{
+                            title: "💰 LOG VƯỢT LINK THÀNH CÔNG (TỪ WEB)",
+                            color: 1752220,
+                            fields: [
+                                { name: "👤 Người vượt", value: `<@${activeUserId}>`, inline: true },
+                                { name: "🆔 ID", value: `\`${activeUserId}\``, inline: true },
+                                { name: "💵 Số tiền", value: "`+300đ`" }
+                            ],
+                            timestamp: new Date()
+                        }]
                     })
                 });
 
-                alert("🎉 Nhận thưởng thành công! Bot Discord của bạn đang tự động xử lý cộng tiền.");
+                alert("🎉 Nhận thưởng thành công! Hệ thống đang tự động xử lý cập nhật.");
                 title.innerText = "Hoàn Thành!";
                 icon.innerText = "✨";
-                desc.innerText = "Hệ thống đã tự động cộng tiền. Bạn có thể đóng trang web này và gõ /sodu trên Discord để kiểm tra.";
-                button.innerText = "ĐÃ CẬP NHẬT LÊN DISCORD";
+                desc.innerText = "Hệ thống đã ghi nhận. Bạn có thể đóng trình duyệt và quay lại Discord gõ /sodu.";
+                button.innerText = "ĐỀU ĐÃ HOÀN TẤT";
             };
         } 
         else {
