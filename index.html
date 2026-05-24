@@ -7,109 +7,67 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
   <style>
-    body { background: linear-gradient(135deg, #0f172a, #1e2937); }
-    .glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+    body { 
+      background: linear-gradient(135deg, #0f172a, #1e2937); 
+    }
+    .glass { 
+      background: rgba(255,255,255,0.08); 
+      backdrop-filter: blur(12px); 
+      border: 1px solid rgba(255,255,255,0.1); 
+    }
   </style>
 </head>
 <body class="min-h-screen text-white flex items-center justify-center p-4">
-  <div class="max-w-2xl w-full glass rounded-3xl p-8 shadow-2xl">
-    <div class="flex items-center justify-between mb-8">
-      <div>
-        <h1 class="text-3xl font-bold flex items-center gap-3">
-          <i class="fas fa-gift text-yellow-400"></i> Nhận Thưởng YeuMoney
-        </h1>
-        <p class="text-gray-400">Kiểm tra số dư & rút tiền</p>
-      </div>
-      <div class="text-right">
-        <div class="text-sm text-gray-400">API Token</div>
-        <input type="text" id="token" 
-               value="8339f88b96a5dac23b72e4a16554d42509f3936f53561cc55ef661b98b4d5e0f"
-               class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-xs w-64">
-      </div>
+  <div class="max-w-md w-full glass rounded-3xl p-10 shadow-2xl text-center">
+    
+    <div class="mb-10">
+      <i class="fas fa-gift text-6xl text-yellow-400 mb-4"></i>
+      <h1 class="text-3xl font-bold">Nhận Thưởng</h1>
+      <p class="text-gray-400 mt-2">Nhấn nút bên dưới để nhận thưởng</p>
     </div>
 
-    <!-- Số dư -->
-    <div class="glass rounded-2xl p-6 mb-6 text-center">
-      <p class="text-gray-400 text-sm">SỐ DƯ HIỆN TẠI</p>
-      <div id="balance" class="text-5xl font-bold text-green-400 mt-2">0đ</div>
-      <p class="text-sm text-gray-400 mt-1">≈ <span id="balanceUSD">0</span> USD</p>
-    </div>
-
-    <div class="grid grid-cols-2 gap-4 mb-8">
-      <div class="glass rounded-2xl p-5">
-        <div class="flex items-center gap-3">
-          <i class="fas fa-chart-line text-blue-400 text-2xl"></i>
-          <div>
-            <p class="text-sm text-gray-400">Tổng Click</p>
-            <p id="totalClick" class="text-2xl font-semibold">0</p>
-          </div>
-        </div>
-      </div>
-      <div class="glass rounded-2xl p-5">
-        <div class="flex items-center gap-3">
-          <i class="fas fa-users text-purple-400 text-2xl"></i>
-          <div>
-            <p class="text-sm text-gray-400">Hoa Hồng Giới Thiệu</p>
-            <p id="referral" class="text-2xl font-semibold">0đ</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Nút nhận thưởng -->
+    <!-- Nút Nhận Thưởng -->
     <button onclick="claimReward()" 
-            class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 transition-all py-4 rounded-2xl text-xl font-bold shadow-lg flex items-center justify-center gap-3">
-      <i class="fas fa-hand-holding-dollar"></i>
-      NHẬN THƯỞNG / RÚT TIỀN
+            class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 
+                   transition-all py-5 rounded-2xl text-xl font-bold shadow-lg flex items-center justify-center gap-3 text-black">
+      <i class="fas fa-hand-holding-dollar text-2xl"></i>
+      NHẬN THƯỞNG
     </button>
 
-    <div id="result" class="hidden mt-6 glass rounded-2xl p-6"></div>
+    <div id="result" class="hidden mt-8 glass rounded-2xl p-6"></div>
 
-    <div class="mt-8 text-center text-xs text-gray-500">
-      <p>Ngưỡng rút tiền: <span class="text-green-400">30.000đ</span></p>
-      <p class="mt-1">Thanh toán trong 24h (Thứ 2 & Thứ 6)</p>
-    </div>
   </div>
 
   <script>
     async function claimReward() {
-      const token = document.getElementById('token').value.trim();
       const resultDiv = document.getElementById('result');
-
+      
       resultDiv.classList.remove('hidden');
       resultDiv.innerHTML = `
-        <div class="text-center">
-          <div class="animate-spin w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p>Đang kiểm tra số dư và yêu cầu nhận thưởng...</p>
+        <div class="text-center py-4">
+          <div class="animate-spin w-10 h-10 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p class="text-lg">Đang xử lý yêu cầu nhận thưởng...</p>
         </div>
       `;
 
       try {
-        // Giả lập gọi API (bạn có thể thay bằng API thật nếu YeuMoney có)
-        await new Promise(r => setTimeout(r, 1500));
-
-        const fakeBalance = Math.floor(Math.random() * 500000) + 50000;
+        // Giả lập thời gian xử lý (bạn có thể thay bằng API thật sau)
+        await new Promise(resolve => setTimeout(resolve, 1800));
 
         resultDiv.innerHTML = `
           <div class="text-center">
-            <i class="fas fa-check-circle text-5xl text-green-400 mb-4"></i>
-            <p class="text-xl font-semibold text-green-400">Yêu cầu nhận thưởng thành công!</p>
-            <p class="mt-2">Số dư: <strong class="text-green-400">${fakeBalance.toLocaleString('vi-VN')}đ</strong></p>
-            <p class="text-sm text-gray-400 mt-4">Hệ thống sẽ duyệt và chuyển tiền trong 24h.</p>
+            <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
+            <p class="text-2xl font-semibold text-green-400">Thành công!</p>
+            <p class="mt-3 text-gray-300">Yêu cầu nhận thưởng đã được ghi nhận.</p>
+            <p class="text-sm text-gray-400 mt-6">Vui lòng chờ duyệt từ hệ thống.</p>
           </div>
         `;
       } catch (err) {
-        resultDiv.innerHTML = `<p class="text-red-400 text-center">❌ Có lỗi xảy ra. Vui lòng thử lại.</p>`;
+        resultDiv.innerHTML = `
+          <p class="text-red-400 text-center">❌ Có lỗi xảy ra. Vui lòng thử lại sau.</p>
+        `;
       }
     }
-
-    // Fake data ban đầu
-    window.onload = () => {
-      document.getElementById('balance').textContent = "245,000đ";
-      document.getElementById('balanceUSD').textContent = "9.8";
-      document.getElementById('totalClick').textContent = "1,284";
-      document.getElementById('referral').textContent = "87,000đ";
-    };
   </script>
 </body>
 </html>
