@@ -11,30 +11,29 @@
       background: linear-gradient(135deg, #0f172a, #1e2937); 
     }
     .glass { 
-      background: rgba(255,255,255,0.08); 
+      background: rgba(255,255,255,0.09); 
       backdrop-filter: blur(12px); 
-      border: 1px solid rgba(255,255,255,0.1); 
+      border: 1px solid rgba(255,255,255,0.12); 
     }
   </style>
 </head>
 <body class="min-h-screen text-white flex items-center justify-center p-4">
   <div class="max-w-md w-full glass rounded-3xl p-10 shadow-2xl text-center">
     
-    <div class="mb-10">
-      <i class="fas fa-gift text-6xl text-yellow-400 mb-4"></i>
-      <h1 class="text-3xl font-bold">Nhận Thưởng</h1>
-      <p class="text-gray-400 mt-2">Nhấn nút bên dưới để nhận thưởng</p>
+    <div class="mb-12">
+      <i class="fas fa-gift text-7xl text-yellow-400 mb-6"></i>
+      <h1 class="text-4xl font-bold">Nhận Thưởng</h1>
+      <p class="text-gray-400 mt-3 text-lg">YeuMoney</p>
     </div>
 
-    <!-- Nút Nhận Thưởng -->
     <button onclick="claimReward()" 
             class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 
-                   transition-all py-5 rounded-2xl text-xl font-bold shadow-lg flex items-center justify-center gap-3 text-black">
-      <i class="fas fa-hand-holding-dollar text-2xl"></i>
+                   transition-all py-6 rounded-2xl text-2xl font-bold shadow-xl flex items-center justify-center gap-4 text-black">
+      <i class="fas fa-hand-holding-dollar text-3xl"></i>
       NHẬN THƯỞNG
     </button>
 
-    <div id="result" class="hidden mt-8 glass rounded-2xl p-6"></div>
+    <div id="result" class="hidden mt-10 glass rounded-2xl p-8"></div>
 
   </div>
 
@@ -44,27 +43,26 @@
       
       resultDiv.classList.remove('hidden');
       resultDiv.innerHTML = `
-        <div class="text-center py-4">
-          <div class="animate-spin w-10 h-10 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p class="text-lg">Đang xử lý yêu cầu nhận thưởng...</p>
+        <div class="text-center">
+          <div class="animate-spin w-12 h-12 border-4 border-yellow-400 border-t-transparent rounded-full mx-auto mb-6"></div>
+          <p class="text-xl">Đang gửi yêu cầu nhận thưởng...</p>
         </div>
       `;
 
       try {
-        // Giả lập thời gian xử lý (bạn có thể thay bằng API thật sau)
-        await new Promise(resolve => setTimeout(resolve, 1800));
+        await new Promise(resolve => setTimeout(resolve, 1600));
 
         resultDiv.innerHTML = `
           <div class="text-center">
-            <i class="fas fa-check-circle text-6xl text-green-400 mb-4"></i>
-            <p class="text-2xl font-semibold text-green-400">Thành công!</p>
-            <p class="mt-3 text-gray-300">Yêu cầu nhận thưởng đã được ghi nhận.</p>
-            <p class="text-sm text-gray-400 mt-6">Vui lòng chờ duyệt từ hệ thống.</p>
+            <i class="fas fa-check-circle text-6xl text-green-400 mb-5"></i>
+            <p class="text-2xl font-semibold text-green-400">Yêu cầu thành công!</p>
+            <p class="text-gray-300 mt-4">Hệ thống đã ghi nhận yêu cầu nhận thưởng của bạn.</p>
+            <p class="text-sm text-gray-400 mt-6">Vui lòng chờ duyệt từ YeuMoney.</p>
           </div>
         `;
       } catch (err) {
         resultDiv.innerHTML = `
-          <p class="text-red-400 text-center">❌ Có lỗi xảy ra. Vui lòng thử lại sau.</p>
+          <p class="text-red-400 text-center text-lg">❌ Có lỗi xảy ra. Vui lòng thử lại.</p>
         `;
       }
     }
