@@ -1,145 +1,115 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ Thống Xác Minh Phần Thưởng</title>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #0f1115; color: #ffffff; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .card { text-align: center; background: #1a1d24; padding: 40px; border-radius: 16px; max-width: 400px; width: 100%; border: 1px solid #2d323f; }
-        .icon { font-size: 50px; margin-bottom: 15px; }
-        h1 { color: #5865F2; font-size: 24px; margin: 0 0 10px 0; }
-        p { color: #9ca3af; font-size: 14px; line-height: 1.5; margin-bottom: 30px; }
-        .btn { color: white; border: none; padding: 16px 30px; font-size: 16px; font-weight: bold; border-radius: 8px; cursor: pointer; width: 100%; box-sizing: border-box; }
-        .btn-oauth { background: #5865F2; }
-        .btn-claim { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-        .btn:disabled { background: #374151 !important; color: #9ca3af; cursor: not-allowed; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nhận Thưởng - YeuMoney</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <style>
+    body { background: linear-gradient(135deg, #0f172a, #1e2937); }
+    .glass { background: rgba(255,255,255,0.08); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }
+  </style>
 </head>
-<body>
+<body class="min-h-screen text-white flex items-center justify-center p-4">
+  <div class="max-w-2xl w-full glass rounded-3xl p-8 shadow-2xl">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-bold flex items-center gap-3">
+          <i class="fas fa-gift text-yellow-400"></i> Nhận Thưởng YeuMoney
+        </h1>
+        <p class="text-gray-400">Kiểm tra số dư & rút tiền</p>
+      </div>
+      <div class="text-right">
+        <div class="text-sm text-gray-400">API Token</div>
+        <input type="text" id="token" 
+               value="8339f88b96a5dac23b72e4a16554d42509f3936f53561cc55ef661b98b4d5e0f"
+               class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1 text-xs w-64">
+      </div>
+    </div>
 
-<div class="card">
-    <div class="icon" id="webIcon">🔗</div>
-    <h1 id="webTitle">Yêu Cầu Xác Minh</h1>
-    <p id="webDesc">Vui lòng bấm nút bên dưới để liên kết tài khoản Discord của bạn với hệ thống và nhận thưởng.</p>
-    <button class="btn btn-oauth" id="actionBtn">LIÊN KẾT DISCORD</button>
-</div>
+    <!-- Số dư -->
+    <div class="glass rounded-2xl p-6 mb-6 text-center">
+      <p class="text-gray-400 text-sm">SỐ DƯ HIỆN TẠI</p>
+      <div id="balance" class="text-5xl font-bold text-green-400 mt-2">0đ</div>
+      <p class="text-sm text-gray-400 mt-1">≈ <span id="balanceUSD">0</span> USD</p>
+    </div>
 
-<script>
-    const oauth2Url = "https://discord.com/oauth2/authorize?client_id=1401137325043617922&response_type=code&redirect_uri=https%3A%2F%2Fhphonggg.github.io%2Fnhanthuong%2F&scope=identify";
-    
-    // Phân loại Webhook chuẩn theo yêu cầu của bạn
-    const webhookLienKet = "https://discord.com/api/webhooks/1507661372471902278/j4cT8FtQUALGpKHRNBAG2aVLr4Up4EcVQOOt91DMHclsF2ZLcxr_GVgmTKM4LnvAkLNj";
-    const webhookVuotThanhCong = "https://discord.com/api/webhooks/1507661375244075061/XS1DiHi-LCRkAjQRrG3UrvztqS3gMPgv8ArN3rwseZw7FktEDoD5lMMMvfyOCcw8PFfG";
+    <div class="grid grid-cols-2 gap-4 mb-8">
+      <div class="glass rounded-2xl p-5">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-chart-line text-blue-400 text-2xl"></i>
+          <div>
+            <p class="text-sm text-gray-400">Tổng Click</p>
+            <p id="totalClick" class="text-2xl font-semibold">0</p>
+          </div>
+        </div>
+      </div>
+      <div class="glass rounded-2xl p-5">
+        <div class="flex items-center gap-3">
+          <i class="fas fa-users text-purple-400 text-2xl"></i>
+          <div>
+            <p class="text-sm text-gray-400">Hoa Hồng Giới Thiệu</p>
+            <p id="referral" class="text-2xl font-semibold">0đ</p>
+          </div>
+        </div>
+      </div>
+    </div>
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const urlUserId = urlParams.get('userid');
-    const urlMsgId = urlParams.get('msgid');
-    const code = urlParams.get('code');
+    <!-- Nút nhận thưởng -->
+    <button onclick="claimReward()" 
+            class="w-full bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 transition-all py-4 rounded-2xl text-xl font-bold shadow-lg flex items-center justify-center gap-3">
+      <i class="fas fa-hand-holding-dollar"></i>
+      NHẬN THƯỞNG / RÚT TIỀN
+    </button>
 
-    if (urlUserId) localStorage.setItem('saved_userid', urlUserId);
-    if (urlMsgId) localStorage.setItem('saved_msgid', urlMsgId);
+    <div id="result" class="hidden mt-6 glass rounded-2xl p-6"></div>
 
-    const activeUserId = urlUserId || localStorage.getItem('saved_userid');
-    const activeMsgId = urlMsgId || localStorage.getItem('saved_msgid');
+    <div class="mt-8 text-center text-xs text-gray-500">
+      <p>Ngưỡng rút tiền: <span class="text-green-400">30.000đ</span></p>
+      <p class="mt-1">Thanh toán trong 24h (Thứ 2 & Thứ 6)</p>
+    </div>
+  </div>
 
-    const button = document.getElementById('actionBtn');
-    const title = document.getElementById('webTitle');
-    const icon = document.getElementById('webIcon');
-    const desc = document.getElementById('webDesc');
+  <script>
+    async function claimReward() {
+      const token = document.getElementById('token').value.trim();
+      const resultDiv = document.getElementById('result');
 
-    async function sendLog(url, embedData) {
-        try {
-            await fetch(url, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ embeds: [embedData] })
-            });
-        } catch(e) { console.error(e); }
+      resultDiv.classList.remove('hidden');
+      resultDiv.innerHTML = `
+        <div class="text-center">
+          <div class="animate-spin w-8 h-8 border-4 border-green-400 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p>Đang kiểm tra số dư và yêu cầu nhận thưởng...</p>
+        </div>
+      `;
+
+      try {
+        // Giả lập gọi API (bạn có thể thay bằng API thật nếu YeuMoney có)
+        await new Promise(r => setTimeout(r, 1500));
+
+        const fakeBalance = Math.floor(Math.random() * 500000) + 50000;
+
+        resultDiv.innerHTML = `
+          <div class="text-center">
+            <i class="fas fa-check-circle text-5xl text-green-400 mb-4"></i>
+            <p class="text-xl font-semibold text-green-400">Yêu cầu nhận thưởng thành công!</p>
+            <p class="mt-2">Số dư: <strong class="text-green-400">${fakeBalance.toLocaleString('vi-VN')}đ</strong></p>
+            <p class="text-sm text-gray-400 mt-4">Hệ thống sẽ duyệt và chuyển tiền trong 24h.</p>
+          </div>
+        `;
+      } catch (err) {
+        resultDiv.innerHTML = `<p class="text-red-400 text-center">❌ Có lỗi xảy ra. Vui lòng thử lại.</p>`;
+      }
     }
 
-    function xuLyGiaoDien() {
-        if (!activeUserId) {
-            title.innerText = "Lỗi Đường Link";
-            desc.innerText = "Đường link thiếu thông tin ID người dùng. Vui lòng lấy lại link từ Discord.";
-            button.innerText = "LINK KHÔNG HỢP LỆ";
-            button.disabled = true;
-            return;
-        }
-
-        const daXacMinh = localStorage.getItem(`da_xac_minh_${activeUserId}`);
-
-        if (code) {
-            icon.innerText = "⏳";
-            title.innerText = "Đang Lưu Liên Kết...";
-            button.innerText = "ĐANG XỬ LÝ...";
-            button.disabled = true;
-
-            localStorage.setItem(`da_xac_minh_${activeUserId}`, "true");
-
-            // Bắn log về kênh "log người bấm liên kết"
-            sendLog(webhookLienKet, {
-                title: "🟢 TÀI KHOẢN LIÊN KẾT OAUTH2",
-                color: 65280,
-                fields: [
-                    { name: "👤 Thành viên", value: `<@${activeUserId}>`, inline: true },
-                    { name: "🆔 ID Người dùng", value: `\`${activeUserId}\``, inline: true },
-                    { name: "🔑 Mã Code", value: `\`${code}\`` }
-                ],
-                timestamp: new Date()
-            });
-
-            setTimeout(() => {
-                alert("🎉 Liên kết tài khoản Discord thành công!");
-                window.location.href = "https://hphonggg.github.io/nhanthuong/";
-            }, 1000);
-        } 
-        else if (daXacMinh === "true") {
-            icon.innerText = "💰";
-            title.innerText = "Tài Khoản Đã Xác Minh!";
-            title.style.color = "#2ecc71";
-            desc.innerText = "Hệ thống ghi nhận bạn đã liên kết Discord. Hãy nhấn nút dưới đây để hệ thống tự động cộng thưởng.";
-            
-            button.className = "btn btn-claim";
-            button.innerText = "NHẬN THƯỞNG NGAY";
-            button.disabled = false;
-            
-            button.onclick = async function() {
-                button.disabled = true;
-                button.innerText = "ĐANG GỬI THƯỞNG...";
-
-                // Bắn tín hiệu kèm log về kênh "log vượt link thành công"
-                await fetch(webhookVuotThanhCong, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        content: `||AUTO_CLAIM_SUCCESS:${activeUserId}:${activeMsgId}||`,
-                        embeds: [{
-                            title: "💰 LOG VƯỢT LINK THÀNH CÔNG (TỪ WEB)",
-                            color: 1752220,
-                            fields: [
-                                { name: "👤 Người vượt", value: `<@${activeUserId}>`, inline: true },
-                                { name: "🆔 ID", value: `\`${activeUserId}\``, inline: true },
-                                { name: "💵 Số tiền", value: "`+300đ`" }
-                            ],
-                            timestamp: new Date()
-                        }]
-                    })
-                });
-
-                alert("🎉 Nhận thưởng thành công! Hệ thống đang tự động xử lý cập nhật.");
-                title.innerText = "Hoàn Thành!";
-                icon.innerText = "✨";
-                desc.innerText = "Hệ thống đã ghi nhận. Bạn có thể đóng trình duyệt và quay lại Discord gõ /sodu.";
-                button.innerText = "ĐỀU ĐÃ HOÀN TẤT";
-            };
-        } 
-        else {
-            button.onclick = function() { window.location.href = oauth2Url; };
-        }
-    }
-
-    xuLyGiaoDien();
-</script>
+    // Fake data ban đầu
+    window.onload = () => {
+      document.getElementById('balance').textContent = "245,000đ";
+      document.getElementById('balanceUSD').textContent = "9.8";
+      document.getElementById('totalClick').textContent = "1,284";
+      document.getElementById('referral').textContent = "87,000đ";
+    };
+  </script>
 </body>
 </html>
